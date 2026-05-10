@@ -1,0 +1,32 @@
+[
+    {
+        "directory": "/Users/sahilrathod/CS/CVM++",
+        "command": "clang++ -std=c++17 -Wall -Wextra -Isrc -c src/main.cpp -o main.o",
+        "file": "src/main.cpp"
+    },
+    {
+        "directory": "/Users/sahilrathod/CS/CVM++",
+        "command": "clang++ -std=c++17 -Wall -Wextra -Isrc -c src/Lexer.cpp -o Lexer.o",
+        "file": "src/Lexer.cpp"
+    },
+    {
+        "directory": "/Users/sahilrathod/CS/CVM++",
+        "command": "clang++ -std=c++17 -Wall -Wextra -Isrc -c src/Parser.cpp -o Parser.o",
+        "file": "src/Parser.cpp"
+    },
+    {
+        "directory": "/Users/sahilrathod/CS/CVM++",
+        "command": "clang++ -std=c++17 -Wall -Wextra -Isrc -c src/Chunk.cpp -o Chunk.o",
+        "file": "src/Chunk.cpp"
+    },
+    {
+        "directory": "/Users/sahilrathod/CS/CVM++",
+        "command": "clang++ -std=c++17 -Wall -Wextra -Isrc -c src/Compiler.cpp -o Compiler.o",
+        "file": "src/Compiler.cpp"
+    },
+    {
+        "directory": "/Users/sahilrathod/CS/CVM++",
+        "command": "clang++ -std=c++17 -Wall -Wextra -Isrc -c src/VM.cpp -o VM.o",
+        "file": "src/VM.cpp"
+    }
+]

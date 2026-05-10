@@ -1,0 +1,8 @@
+// 01_arithmetic.cvm  —  Basic arithmetic & operator precedence
+print 2 + 3;
+print 10 - 4;
+print 3 * 7;
+print 20 / 4;
+print 2 + 3 * 4;
+print (2 + 3) * 4;
+print -5 + 10;
