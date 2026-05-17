@@ -1,11 +1,7 @@
 #include "Lexer.hpp"
 #include <cctype>
 
-// ── Construction ─────────────────────────────────────────────────────────────
-
 Lexer::Lexer(const std::string& source) : source_(source) {}
-
-// ── Public API ───────────────────────────────────────────────────────────────
 
 std::vector<Token> Lexer::tokenize() {
     std::vector<Token> tokens;
@@ -17,8 +13,6 @@ std::vector<Token> Lexer::tokenize() {
     }
     return tokens;
 }
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 bool Lexer::isAtEnd() const { return current_ >= source_.size(); }
 
@@ -50,8 +44,6 @@ Token Lexer::errorToken(const std::string& msg) const {
     return Token(TokenType::TOKEN_ERROR, msg, line_);
 }
 
-// ── Whitespace & Comments ────────────────────────────────────────────────────
-
 void Lexer::skipWhitespace() {
     while (!isAtEnd()) {
         char c = peek();
@@ -66,7 +58,7 @@ void Lexer::skipWhitespace() {
                 advance();
                 break;
             case '/':
-                // single-line comment: // ...
+
                 if (peekNext() == '/') {
                     while (!isAtEnd() && peek() != '\n') advance();
                 } else {
@@ -79,14 +71,10 @@ void Lexer::skipWhitespace() {
     }
 }
 
-// ── Number Literal ───────────────────────────────────────────────────────────
-
 Token Lexer::number() {
     while (std::isdigit(peek())) advance();
     return makeToken(TokenType::NUMBER);
 }
-
-// ── Identifier / Keyword ─────────────────────────────────────────────────────
 
 Token Lexer::identifier() {
     while (std::isalnum(peek()) || peek() == '_') advance();
@@ -106,8 +94,6 @@ TokenType Lexer::identifierType() const {
     return TokenType::IDENTIFIER;
 }
 
-// ── Main Scan ────────────────────────────────────────────────────────────────
-
 Token Lexer::scanToken() {
     skipWhitespace();
     start_ = current_;
@@ -116,13 +102,10 @@ Token Lexer::scanToken() {
 
     char c = advance();
 
-    // Numbers
     if (std::isdigit(c)) return number();
 
-    // Identifiers / keywords
     if (std::isalpha(c) || c == '_') return identifier();
 
-    // Single & multi-character tokens
     switch (c) {
         case '(': return makeToken(TokenType::LEFT_PAREN);
         case ')': return makeToken(TokenType::RIGHT_PAREN);

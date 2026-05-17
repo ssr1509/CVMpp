@@ -2,11 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 
-// ── Construction ─────────────────────────────────────────────────────────────
-
 VM::VM() : sp_(stack_), ip_(nullptr), chunk_(nullptr), globalNames_(nullptr) {}
-
-// ── Stack operations ─────────────────────────────────────────────────────────
 
 void VM::push(Value v) {
     if (sp_ >= stack_ + STACK_MAX) {
@@ -26,8 +22,6 @@ Value VM::peek(int distance) const {
     return *(sp_ - 1 - distance);
 }
 
-// ── Byte reading ─────────────────────────────────────────────────────────────
-
 uint8_t VM::readByte() { return *ip_++; }
 
 uint16_t VM::readShort() {
@@ -43,15 +37,12 @@ void VM::runtimeError(const std::string& msg) {
     std::cerr << "[bytecode offset " << offset << "] Runtime Error: " << msg << "\n";
 }
 
-// ── Main execution loop ─────────────────────────────────────────────────────
-
 VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNames) {
     chunk_       = &chunk;
     globalNames_ = &globalNames;
     ip_          = chunk.code().data();
     sp_          = stack_;
 
-    // Macro helpers for binary arithmetic / comparison
     #define BINARY_OP_INT(op)                                     \
         do {                                                      \
             Value b = pop(); Value a = pop();                     \
@@ -68,7 +59,7 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
         Opcode instruction = readOpcode();
 
         switch (instruction) {
-            // ── Constants ──
+
             case Opcode::OP_CONSTANT: {
                 uint8_t idx = readByte();
                 push(chunk.constants()[idx]);
@@ -77,7 +68,6 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
             case Opcode::OP_TRUE:  push(Value{true});  break;
             case Opcode::OP_FALSE: push(Value{false}); break;
 
-            // ── Arithmetic ──
             case Opcode::OP_ADD: BINARY_OP_INT(+); break;
             case Opcode::OP_SUB: BINARY_OP_INT(-); break;
             case Opcode::OP_MUL: BINARY_OP_INT(*); break;
@@ -96,7 +86,6 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
                 break;
             }
 
-            // ── Comparison ──
             case Opcode::OP_EQUAL: {
                 Value b = pop(); Value a = pop();
                 push(Value{(bool)(a == b)});
@@ -112,7 +101,6 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
             case Opcode::OP_GREATER:       BINARY_CMP(>);  break;
             case Opcode::OP_GREATER_EQUAL: BINARY_CMP(>=); break;
 
-            // ── Logic ──
             case Opcode::OP_NOT: {
                 Value a = pop();
                 push(Value{(bool)!asBool(a)});
@@ -129,7 +117,6 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
                 break;
             }
 
-            // ── Global variables ──
             case Opcode::OP_DEFINE_GLOBAL: {
                 uint8_t idx = readByte();
                 const std::string& name = (*globalNames_)[idx];
@@ -155,11 +142,10 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
                     runtimeError("Undefined variable '" + name + "'.");
                     return Result::RUNTIME_ERROR;
                 }
-                it->second = peek();  // leave value on stack
+                it->second = peek();  
                 break;
             }
 
-            // ── Local variables ──
             case Opcode::OP_GET_LOCAL: {
                 uint8_t slot = readByte();
                 push(stack_[slot]);
@@ -167,11 +153,10 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
             }
             case Opcode::OP_SET_LOCAL: {
                 uint8_t slot = readByte();
-                stack_[slot] = peek();  // leave value on stack
+                stack_[slot] = peek();  
                 break;
             }
 
-            // ── Control flow ──
             case Opcode::OP_JUMP: {
                 uint16_t offset = readShort();
                 ip_ += offset;
@@ -190,7 +175,6 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
                 break;
             }
 
-            // ── I/O ──
             case Opcode::OP_PRINT: {
                 Value v = pop();
                 std::cout << v << "\n";
@@ -203,12 +187,10 @@ VM::Result VM::run(const Chunk& chunk, const std::vector<std::string>& globalNam
                 break;
             }
 
-            // ── Stack ──
             case Opcode::OP_POP:
                 pop();
                 break;
 
-            // ── Halt ──
             case Opcode::OP_RETURN:
                 return Result::OK;
 

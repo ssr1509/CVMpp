@@ -4,20 +4,16 @@
 #include <string>
 #include <vector>
 
-// ── Lexer ────────────────────────────────────────────────────────────────────
-// Converts a raw source string into a flat vector of Tokens.
-
 class Lexer {
 public:
     explicit Lexer(const std::string& source);
 
-    // Tokenize the entire source, ending with TOKEN_EOF.
     std::vector<Token> tokenize();
 
 private:
     std::string source_;
-    size_t      start_   = 0;   // start of current lexeme
-    size_t      current_ = 0;   // scan cursor
+    size_t      start_   = 0;   
+    size_t      current_ = 0;   
     int         line_    = 1;
 
     bool  isAtEnd() const;

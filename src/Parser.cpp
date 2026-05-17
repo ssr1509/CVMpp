@@ -2,11 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 
-// ── Construction ─────────────────────────────────────────────────────────────
-
 Parser::Parser(const std::vector<Token>& tokens) : tokens_(tokens) {}
-
-// ── Public API ───────────────────────────────────────────────────────────────
 
 std::vector<StmtPtr> Parser::parse() {
     std::vector<StmtPtr> stmts;
@@ -16,8 +12,6 @@ std::vector<StmtPtr> Parser::parse() {
     }
     return stmts;
 }
-
-// ── Token helpers ────────────────────────────────────────────────────────────
 
 const Token& Parser::peek() const       { return tokens_[current_]; }
 const Token& Parser::previous() const   { return tokens_[current_ - 1]; }
@@ -67,8 +61,6 @@ void Parser::synchronize() {
     }
 }
 
-// ── Declarations ─────────────────────────────────────────────────────────────
-
 StmtPtr Parser::declaration() {
     try {
         if (match(TokenType::LET)) return varDeclaration();
@@ -88,8 +80,6 @@ StmtPtr Parser::varDeclaration() {
     consume(TokenType::SEMICOLON, "Expected ';' after variable declaration.");
     return std::make_unique<VarDeclStmt>(name.lexeme, std::move(initializer));
 }
-
-// ── Statements ───────────────────────────────────────────────────────────────
 
 StmtPtr Parser::statement() {
     if (match(TokenType::PRINT))      return printStatement();
@@ -145,17 +135,14 @@ StmtPtr Parser::expressionStatement() {
     return std::make_unique<ExpressionStmt>(std::move(expr));
 }
 
-// ── Expressions (precedence climbing) ────────────────────────────────────────
-
 ExprPtr Parser::expression()  { return assignment(); }
 
 ExprPtr Parser::assignment() {
     ExprPtr expr = logicOr();
 
     if (match(TokenType::EQUAL)) {
-        ExprPtr value = assignment();   // right-associative
+        ExprPtr value = assignment();   
 
-        // The left-hand side must be a variable
         if (auto* var = dynamic_cast<VariableExpr*>(expr.get())) {
             std::string name = var->name;
             return std::make_unique<AssignExpr>(name, std::move(value));

@@ -6,33 +6,27 @@
 #include <vector>
 #include <string>
 
-// ── Forward declarations ─────────────────────────────────────────────────────
 struct Expr;
 struct Stmt;
 
 using ExprPtr = std::unique_ptr<Expr>;
 using StmtPtr = std::unique_ptr<Stmt>;
 
-// ── Expression Nodes ─────────────────────────────────────────────────────────
-
 struct Expr {
     virtual ~Expr() = default;
 };
 
-// Integer or Boolean literal
 struct LiteralExpr : Expr {
     Value value;
     explicit LiteralExpr(Value v) : value(std::move(v)) {}
 };
 
-// Unary expression: -a, !a
 struct UnaryExpr : Expr {
     TokenType  op;
     ExprPtr    operand;
     UnaryExpr(TokenType o, ExprPtr e) : op(o), operand(std::move(e)) {}
 };
 
-// Binary expression: a + b, a == b, a && b, etc.
 struct BinaryExpr : Expr {
     TokenType  op;
     ExprPtr    left;
@@ -41,47 +35,38 @@ struct BinaryExpr : Expr {
         : op(o), left(std::move(l)), right(std::move(r)) {}
 };
 
-// Variable reference
 struct VariableExpr : Expr {
     std::string name;
     explicit VariableExpr(const std::string& n) : name(n) {}
 };
 
-// Assignment: x = <expr>
 struct AssignExpr : Expr {
     std::string name;
     ExprPtr     value;
     AssignExpr(const std::string& n, ExprPtr v) : name(n), value(std::move(v)) {}
 };
 
-// input expression (reads an integer from stdin)
 struct InputExpr : Expr {};
 
-// Grouping expression (parenthesised)
 struct GroupExpr : Expr {
     ExprPtr expression;
     explicit GroupExpr(ExprPtr e) : expression(std::move(e)) {}
 };
 
-// ── Statement Nodes ──────────────────────────────────────────────────────────
-
 struct Stmt {
     virtual ~Stmt() = default;
 };
 
-// Expression statement (expression followed by ';')
 struct ExpressionStmt : Stmt {
     ExprPtr expression;
     explicit ExpressionStmt(ExprPtr e) : expression(std::move(e)) {}
 };
 
-// print <expr>;
 struct PrintStmt : Stmt {
     ExprPtr expression;
     explicit PrintStmt(ExprPtr e) : expression(std::move(e)) {}
 };
 
-// let <name> = <expr>;
 struct VarDeclStmt : Stmt {
     std::string name;
     ExprPtr     initializer;
@@ -89,33 +74,28 @@ struct VarDeclStmt : Stmt {
         : name(n), initializer(std::move(init)) {}
 };
 
-// { <stmts...> }
 struct BlockStmt : Stmt {
     std::vector<StmtPtr> statements;
     explicit BlockStmt(std::vector<StmtPtr> stmts)
         : statements(std::move(stmts)) {}
 };
 
-// if (<cond>) <then> else <elseBody>
 struct IfStmt : Stmt {
     ExprPtr  condition;
     StmtPtr  thenBranch;
-    StmtPtr  elseBranch;   // may be nullptr
+    StmtPtr  elseBranch;   
     IfStmt(ExprPtr cond, StmtPtr t, StmtPtr e)
         : condition(std::move(cond)),
           thenBranch(std::move(t)),
           elseBranch(std::move(e)) {}
 };
 
-// while (<cond>) <body>
 struct WhileStmt : Stmt {
     ExprPtr condition;
     StmtPtr body;
     WhileStmt(ExprPtr cond, StmtPtr b)
         : condition(std::move(cond)), body(std::move(b)) {}
 };
-
-// ── AST Pretty Printer (debug) ──────────────────────────────────────────────
 
 inline void printAST(const Expr* expr, int indent = 0);
 inline void printAST(const Stmt* stmt, int indent = 0);

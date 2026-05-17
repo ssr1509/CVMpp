@@ -3,60 +3,47 @@
 #include <cstdint>
 #include <string>
 
-// ── Instruction Set Architecture ─────────────────────────────────────────────
-// Every opcode is a single byte.  Operands (if any) follow immediately after
-// the opcode in the bytecode stream.
-
 enum class Opcode : uint8_t {
-    // ── Constants & Literals ──
-    OP_CONSTANT,        // [op][index]       push constants[index]
-    OP_TRUE,            // [op]              push true
-    OP_FALSE,           // [op]              push false
 
-    // ── Arithmetic ──
-    OP_ADD,             // [op]  pop b, pop a, push a+b
-    OP_SUB,             // [op]  pop b, pop a, push a-b
-    OP_MUL,             // [op]  pop b, pop a, push a*b
-    OP_DIV,             // [op]  pop b, pop a, push a/b
-    OP_NEGATE,          // [op]  pop a, push -a
+    OP_CONSTANT,        
+    OP_TRUE,            
+    OP_FALSE,           
 
-    // ── Comparison / Logic ──
-    OP_EQUAL,           // [op]  pop b, pop a, push a==b
-    OP_NOT_EQUAL,       // [op]  pop b, pop a, push a!=b
-    OP_LESS,            // [op]  pop b, pop a, push a<b
-    OP_LESS_EQUAL,      // [op]  pop b, pop a, push a<=b
-    OP_GREATER,         // [op]  pop b, pop a, push a>b
-    OP_GREATER_EQUAL,   // [op]  pop b, pop a, push a>=b
-    OP_NOT,             // [op]  pop a, push !a
-    OP_AND,             // [op]  pop b, pop a, push a&&b
-    OP_OR,              // [op]  pop b, pop a, push a||b
+    OP_ADD,             
+    OP_SUB,             
+    OP_MUL,             
+    OP_DIV,             
+    OP_NEGATE,          
 
-    // ── Global Variables ──
-    OP_DEFINE_GLOBAL,   // [op][index]  define globals[constants[index]] = pop()
-    OP_GET_GLOBAL,      // [op][index]  push globals[constants[index]]
-    OP_SET_GLOBAL,      // [op][index]  globals[constants[index]] = peek(); pop()
+    OP_EQUAL,           
+    OP_NOT_EQUAL,       
+    OP_LESS,            
+    OP_LESS_EQUAL,      
+    OP_GREATER,         
+    OP_GREATER_EQUAL,   
+    OP_NOT,             
+    OP_AND,             
+    OP_OR,              
 
-    // ── Local Variables ──
-    OP_GET_LOCAL,       // [op][slot]   push stack[slot]
-    OP_SET_LOCAL,       // [op][slot]   stack[slot] = peek()
+    OP_DEFINE_GLOBAL,   
+    OP_GET_GLOBAL,      
+    OP_SET_GLOBAL,      
 
-    // ── Control Flow ──
-    OP_JUMP,            // [op][hi][lo]       ip += offset  (unconditional)
-    OP_JUMP_IF_FALSE,   // [op][hi][lo]       if !pop() then ip += offset
-    OP_LOOP,            // [op][hi][lo]       ip -= offset  (loop back)
+    OP_GET_LOCAL,       
+    OP_SET_LOCAL,       
 
-    // ── I/O ──
-    OP_PRINT,           // [op]  pop and print to stdout
-    OP_INPUT,           // [op]  read integer from stdin, push
+    OP_JUMP,            
+    OP_JUMP_IF_FALSE,   
+    OP_LOOP,            
 
-    // ── Stack manipulation ──
-    OP_POP,             // [op]  discard top of stack
+    OP_PRINT,           
+    OP_INPUT,           
 
-    // ── Halt ──
-    OP_RETURN,          // [op]  end execution
+    OP_POP,             
+
+    OP_RETURN,          
 };
 
-// Pretty-print an opcode name (useful for debug/disassembly)
 inline std::string opcodeName(Opcode op) {
     switch (op) {
         case Opcode::OP_CONSTANT:       return "OP_CONSTANT";

@@ -3,8 +3,6 @@
 #include <iomanip>
 #include <stdexcept>
 
-// ── Bytecode emission ────────────────────────────────────────────────────────
-
 void Chunk::writeByte(uint8_t byte) {
     code_.push_back(byte);
 }
@@ -27,18 +25,16 @@ void Chunk::writeConstant(Value value) {
     writeByte(idx);
 }
 
-// ── Jump helpers ─────────────────────────────────────────────────────────────
-
 size_t Chunk::emitJump(Opcode jumpOp) {
     writeOpcode(jumpOp);
-    // 16-bit placeholder (big-endian)
+
     writeByte(0xff);
     writeByte(0xff);
-    return code_.size() - 2;   // offset of the placeholder
+    return code_.size() - 2;   
 }
 
 void Chunk::patchJump(size_t offset) {
-    // distance from just after the placeholder to the current end
+
     size_t jump = code_.size() - offset - 2;
     if (jump > UINT16_MAX) {
         throw std::runtime_error("Too much code to jump over.");
@@ -49,7 +45,7 @@ void Chunk::patchJump(size_t offset) {
 
 void Chunk::emitLoop(size_t loopStart) {
     writeOpcode(Opcode::OP_LOOP);
-    // +2 for the two operand bytes we are about to emit
+
     size_t offset = code_.size() - loopStart + 2;
     if (offset > UINT16_MAX) {
         throw std::runtime_error("Loop body too large.");
@@ -57,8 +53,6 @@ void Chunk::emitLoop(size_t loopStart) {
     writeByte(static_cast<uint8_t>((offset >> 8) & 0xff));
     writeByte(static_cast<uint8_t>(offset & 0xff));
 }
-
-// ── Disassembler ─────────────────────────────────────────────────────────────
 
 void Chunk::disassemble(const std::string& name) const {
     std::cout << "== " << name << " ==\n";
@@ -72,7 +66,7 @@ size_t Chunk::disassembleInstruction(size_t offset) const {
 
     Opcode op = static_cast<Opcode>(code_[offset]);
     switch (op) {
-        // Simple (no operand)
+
         case Opcode::OP_ADD:
         case Opcode::OP_SUB:
         case Opcode::OP_MUL:
@@ -96,7 +90,6 @@ size_t Chunk::disassembleInstruction(size_t offset) const {
             std::cout << opcodeName(op) << "\n";
             return offset + 1;
 
-        // Byte operand
         case Opcode::OP_CONSTANT: {
             uint8_t idx = code_[offset + 1];
             std::cout << opcodeName(op) << "  " << (int)idx
@@ -107,8 +100,7 @@ size_t Chunk::disassembleInstruction(size_t offset) const {
         case Opcode::OP_GET_GLOBAL:
         case Opcode::OP_SET_GLOBAL: {
             uint8_t idx = code_[offset + 1];
-            // the constant at idx is the variable name stored as int — we
-            // just print the index for brevity
+
             std::cout << opcodeName(op) << "  " << (int)idx << "\n";
             return offset + 2;
         }
@@ -119,7 +111,6 @@ size_t Chunk::disassembleInstruction(size_t offset) const {
             return offset + 2;
         }
 
-        // 16-bit operand (jump offset)
         case Opcode::OP_JUMP:
         case Opcode::OP_JUMP_IF_FALSE: {
             uint16_t jump = static_cast<uint16_t>(code_[offset + 1] << 8)

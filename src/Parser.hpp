@@ -5,14 +5,10 @@
 #include <vector>
 #include <string>
 
-// ── Parser ───────────────────────────────────────────────────────────────────
-// Recursive-descent parser that transforms a token stream into an AST.
-
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens);
 
-    // Parse the full program → list of statements.
     std::vector<StmtPtr> parse();
 
     bool hadError() const { return hadError_; }
@@ -22,7 +18,6 @@ private:
     size_t current_ = 0;
     bool   hadError_ = false;
 
-    // ── Token helpers ──
     const Token& peek() const;
     const Token& previous() const;
     bool  isAtEnd() const;
@@ -33,7 +28,6 @@ private:
     void  error(const Token& token, const std::string& msg);
     void  synchronize();
 
-    // ── Grammar rules (recursive descent) ──
     StmtPtr declaration();
     StmtPtr varDeclaration();
     StmtPtr statement();

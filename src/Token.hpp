@@ -2,42 +2,33 @@
 
 #include <string>
 
-// ── Token Types ──────────────────────────────────────────────────────────────
-
 enum class TokenType {
-    // Single-character tokens
-    LEFT_PAREN, RIGHT_PAREN,        // ( )
-    LEFT_BRACE, RIGHT_BRACE,        // { }
-    PLUS, MINUS, STAR, SLASH,       // + - * /
-    SEMICOLON,                      // ;
 
-    // One or two character tokens
-    BANG, BANG_EQUAL,               // !  !=
-    EQUAL, EQUAL_EQUAL,             // =  ==
-    LESS, LESS_EQUAL,               // <  <=
-    GREATER, GREATER_EQUAL,         // >  >=
+    LEFT_PAREN, RIGHT_PAREN,        
+    LEFT_BRACE, RIGHT_BRACE,        
+    PLUS, MINUS, STAR, SLASH,       
+    SEMICOLON,                      
 
-    // Logical operators
-    AND, OR,                        // && ||
+    BANG, BANG_EQUAL,               
+    EQUAL, EQUAL_EQUAL,             
+    LESS, LESS_EQUAL,               
+    GREATER, GREATER_EQUAL,         
 
-    // Literals
-    NUMBER,                         // integer literal
-    IDENTIFIER,                     // variable name
-    TRUE_LIT, FALSE_LIT,           // true false
+    AND, OR,                        
 
-    // Keywords
-    LET,                            // let
-    IF, ELSE,                       // if else
-    WHILE,                          // while
-    PRINT,                          // print
-    INPUT,                          // input
+    NUMBER,                         
+    IDENTIFIER,                     
+    TRUE_LIT, FALSE_LIT,           
 
-    // Special
-    TOKEN_EOF,                      // end of source
-    TOKEN_ERROR,                    // lexer error
+    LET,                            
+    IF, ELSE,                       
+    WHILE,                          
+    PRINT,                          
+    INPUT,                          
+
+    TOKEN_EOF,                      
+    TOKEN_ERROR,                    
 };
-
-// ── Token ────────────────────────────────────────────────────────────────────
 
 struct Token {
     TokenType   type;
@@ -49,7 +40,6 @@ struct Token {
         : type(t), lexeme(lex), line(ln) {}
 };
 
-// Pretty-print helper (debug)
 inline std::string tokenTypeName(TokenType t) {
     switch (t) {
         case TokenType::LEFT_PAREN:     return "LEFT_PAREN";

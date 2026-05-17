@@ -10,8 +10,6 @@
 #include <string>
 #include <cstring>
 
-// ── Flags ────────────────────────────────────────────────────────────────────
-
 struct Options {
     bool showTokens   = false;
     bool showAST      = false;
@@ -19,10 +17,8 @@ struct Options {
     std::string filename;
 };
 
-// ── Run a source string through the full pipeline ────────────────────────────
-
 static int runSource(const std::string& source, const Options& opts) {
-    // 1. Lex
+
     Lexer lexer(source);
     auto tokens = lexer.tokenize();
 
@@ -35,7 +31,6 @@ static int runSource(const std::string& source, const Options& opts) {
         std::cout << "\n";
     }
 
-    // Check for lexer errors
     for (auto& t : tokens) {
         if (t.type == TokenType::TOKEN_ERROR) {
             std::cerr << "[line " << t.line << "] Lexer error: " << t.lexeme << "\n";
@@ -43,7 +38,6 @@ static int runSource(const std::string& source, const Options& opts) {
         }
     }
 
-    // 2. Parse
     Parser parser(tokens);
     auto program = parser.parse();
 
@@ -57,7 +51,6 @@ static int runSource(const std::string& source, const Options& opts) {
         std::cout << "\n";
     }
 
-    // 3. Compile
     Compiler compiler;
     if (!compiler.compile(program)) {
         std::cerr << "Compilation failed.\n";
@@ -69,15 +62,12 @@ static int runSource(const std::string& source, const Options& opts) {
         std::cout << "\n";
     }
 
-    // 4. Execute
     VM vm;
     auto result = vm.run(compiler.chunk(), compiler.globalNames());
     if (result != VM::Result::OK) return 1;
 
     return 0;
 }
-
-// ── REPL ─────────────────────────────────────────────────────────────────────
 
 static void repl(const Options& opts) {
     std::cout << "CVM++ REPL  (type 'exit' to quit)\n";
@@ -88,14 +78,9 @@ static void repl(const Options& opts) {
         if (line == "exit") break;
         if (line.empty()) continue;
 
-        // If the line doesn't end with ';' and doesn't start with a keyword
-        // that produces a statement, wrap it as `print <expr>;` for convenience.
-        // Otherwise run it verbatim.
         runSource(line, opts);
     }
 }
-
-// ── File runner ──────────────────────────────────────────────────────────────
 
 static int runFile(const std::string& path, const Options& opts) {
     std::ifstream file(path);
@@ -107,8 +92,6 @@ static int runFile(const std::string& path, const Options& opts) {
     ss << file.rdbuf();
     return runSource(ss.str(), opts);
 }
-
-// ── Entry point ──────────────────────────────────────────────────────────────
 
 int main(int argc, char* argv[]) {
     Options opts;

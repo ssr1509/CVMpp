@@ -2,8 +2,6 @@
 #include <iostream>
 #include <stdexcept>
 
-// ── Construction ─────────────────────────────────────────────────────────────
-
 Compiler::Compiler() {}
 
 bool Compiler::compile(const std::vector<StmtPtr>& program) {
@@ -14,13 +12,11 @@ bool Compiler::compile(const std::vector<StmtPtr>& program) {
     return true;
 }
 
-// ── Scope management ─────────────────────────────────────────────────────────
-
 void Compiler::beginScope() { scopeDepth_++; }
 
 void Compiler::endScope() {
     scopeDepth_--;
-    // Pop locals that belong to the scope we just left
+
     while (!locals_.empty() && locals_.back().depth > scopeDepth_) {
         chunk_.writeOpcode(Opcode::OP_POP);
         locals_.pop_back();
@@ -32,23 +28,21 @@ void Compiler::addLocal(const std::string& name) {
 }
 
 int Compiler::resolveLocal(const std::string& name) {
-    // Walk backwards so inner scopes shadow outer ones
+
     for (int i = static_cast<int>(locals_.size()) - 1; i >= 0; i--) {
         if (locals_[i].name == name) return i;
     }
-    return -1;  // not a local → treat as global
+    return -1;  
 }
 
 int Compiler::resolveGlobal(const std::string& name) {
     for (int i = 0; i < (int)globalNames_.size(); i++) {
         if (globalNames_[i] == name) return i;
     }
-    // If not found, allocate a new global slot
+
     globalNames_.push_back(name);
     return static_cast<int>(globalNames_.size() - 1);
 }
-
-// ── Statement compilation ────────────────────────────────────────────────────
 
 void Compiler::compileStmt(const Stmt* stmt) {
     if (auto* s = dynamic_cast<const ExpressionStmt*>(stmt))
@@ -69,7 +63,7 @@ void Compiler::compileStmt(const Stmt* stmt) {
 
 void Compiler::compileExpressionStmt(const ExpressionStmt* s) {
     compileExpr(s->expression.get());
-    chunk_.writeOpcode(Opcode::OP_POP);  // discard the value
+    chunk_.writeOpcode(Opcode::OP_POP);  
 }
 
 void Compiler::compilePrintStmt(const PrintStmt* s) {
@@ -81,15 +75,15 @@ void Compiler::compileVarDeclStmt(const VarDeclStmt* s) {
     if (s->initializer) {
         compileExpr(s->initializer.get());
     } else {
-        // default to 0
+
         chunk_.writeConstant(Value{(int64_t)0});
     }
 
     if (scopeDepth_ > 0) {
-        // Local variable: the value is already on the stack at the right slot
+
         addLocal(s->name);
     } else {
-        // Global variable: register the name and use its index
+
         int idx = resolveGlobal(s->name);
         chunk_.writeOpcode(Opcode::OP_DEFINE_GLOBAL);
         chunk_.writeByte(static_cast<uint8_t>(idx));
@@ -105,54 +99,41 @@ void Compiler::compileBlockStmt(const BlockStmt* s) {
 }
 
 void Compiler::compileIfStmt(const IfStmt* s) {
-    // Compile condition
+
     compileExpr(s->condition.get());
 
-    // Emit conditional jump (skip then-branch if false)
     size_t thenJump = chunk_.emitJump(Opcode::OP_JUMP_IF_FALSE);
-    chunk_.writeOpcode(Opcode::OP_POP);  // pop condition from stack
+    chunk_.writeOpcode(Opcode::OP_POP);  
 
-    // Compile then-branch
     compileStmt(s->thenBranch.get());
 
-    // Emit unconditional jump over else-branch
     size_t elseJump = chunk_.emitJump(Opcode::OP_JUMP);
 
-    // Patch the conditional jump to land here
     chunk_.patchJump(thenJump);
-    chunk_.writeOpcode(Opcode::OP_POP);  // pop condition from stack
+    chunk_.writeOpcode(Opcode::OP_POP);  
 
-    // Compile else-branch (if present)
     if (s->elseBranch) {
         compileStmt(s->elseBranch.get());
     }
 
-    // Patch unconditional jump
     chunk_.patchJump(elseJump);
 }
 
 void Compiler::compileWhileStmt(const WhileStmt* s) {
     size_t loopStart = chunk_.size();
 
-    // Compile condition
     compileExpr(s->condition.get());
 
-    // Jump out if false
     size_t exitJump = chunk_.emitJump(Opcode::OP_JUMP_IF_FALSE);
-    chunk_.writeOpcode(Opcode::OP_POP);  // pop condition
+    chunk_.writeOpcode(Opcode::OP_POP);  
 
-    // Compile body
     compileStmt(s->body.get());
 
-    // Loop back to condition
     chunk_.emitLoop(loopStart);
 
-    // Patch exit jump
     chunk_.patchJump(exitJump);
-    chunk_.writeOpcode(Opcode::OP_POP);  // pop condition
+    chunk_.writeOpcode(Opcode::OP_POP);  
 }
-
-// ── Expression compilation ───────────────────────────────────────────────────
 
 void Compiler::compileExpr(const Expr* expr) {
     if (auto* e = dynamic_cast<const LiteralExpr*>(expr))
@@ -219,7 +200,7 @@ void Compiler::compileVariable(const VariableExpr* e) {
         chunk_.writeOpcode(Opcode::OP_GET_LOCAL);
         chunk_.writeByte(static_cast<uint8_t>(slot));
     } else {
-        // Global: find name index
+
         int idx = resolveGlobal(e->name);
         chunk_.writeOpcode(Opcode::OP_GET_GLOBAL);
         chunk_.writeByte(static_cast<uint8_t>(idx));
