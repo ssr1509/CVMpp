@@ -28,5 +28,38 @@ The final stage is the Virtual Machine (`VM.cpp`), which acts as an emulator exe
 * **Instruction Dispatch:** The VM runs an infinite loop containing a `switch` statement that reads the bytecode array one byte at a time. It executes the logic for the given opcode (e.g., popping two values for an `OP_ADD`, adding them, and pushing the result).
 * **Environment:** The VM manages global variables and tracks the instruction pointer (`ip_`) to support branching and loops.
 
+## 5. Language Grammar
+The custom language parsed by CVMpp follows a structured context-free grammar, closely resembling C or JavaScript.
+It supports the following language constructs:
+
+* **Statements**: Block statements (`{ ... }`), `if` / `else` conditionals, `while` loops, and `print` statements.
+* **Declarations**: Variable declarations using `let identifier = expression;`.
+* **Expressions**:
+  * **Logical**: `&&`, `||`, `!`
+  * **Equality**: `==`, `!=`
+  * **Comparison**: `<`, `<=`, `>`, `>=`
+  * **Arithmetic**: `+`, `-`, `*`, `/`
+  * **Primary**: Numbers, `true`, `false`, identifiers, and `input`.
+
+*Example Grammar Snippet (EBNF-like):*
+```text
+program     -> declaration* EOF
+declaration -> varDecl | statement
+varDecl     -> "let" IDENTIFIER "=" expression ";"
+statement   -> ifStmt | whileStmt | printStmt | block | exprStmt
+```
+
+## 6. Instruction Set Architecture (ISA)
+The Virtual Machine executes a custom Instruction Set Architecture (ISA). The instructions (opcodes) are 1-byte wide and are defined in `Opcode.hpp`. They can be grouped logically as follows:
+
+* **Constants & Literals**: `OP_CONSTANT`, `OP_TRUE`, `OP_FALSE`
+* **Arithmetic & Math**: `OP_ADD`, `OP_SUB`, `OP_MUL`, `OP_DIV`, `OP_NEGATE`
+* **Comparison & Logic**: `OP_EQUAL`, `OP_LESS`, `OP_GREATER`, `OP_NOT`, `OP_AND`, `OP_OR` (and their inverses)
+* **Variables (Global/Local)**: `OP_DEFINE_GLOBAL`, `OP_GET_GLOBAL`, `OP_SET_GLOBAL`, `OP_GET_LOCAL`, `OP_SET_LOCAL`
+* **Control Flow**: `OP_JUMP`, `OP_JUMP_IF_FALSE`, `OP_LOOP`
+* **I/O & Stack**: `OP_PRINT`, `OP_INPUT`, `OP_POP`, `OP_RETURN`
+
+Because it is a stack-based ISA, arithmetic instructions like `OP_ADD` do not take register arguments. Instead, they implicitly pop the top two values off the evaluation stack, add them together, and push the result back onto the stack.
+
 ## Conclusion
 CVMpp successfully demonstrates the full lifecycle of a programming language. By abstracting the execution through a Virtual Machine, the system achieves portability and clear separation of concerns, allowing for complex control flow, variable tracking, and arithmetic operations to be executed efficiently.
