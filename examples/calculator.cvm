@@ -1,4 +1,4 @@
-// t will compute the factorial
+// it will compute the factorial
 let num = input;
 let result = 1;
 
